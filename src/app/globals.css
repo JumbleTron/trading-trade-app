@@ -1,8 +1,63 @@
 @import "tailwindcss";
 
+/* 
+  TradeTraining Custom Design System (Modern dark/light glassmorphic variables)
+*/
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Color Palette (Light Mode) */
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  
+  --card-bg: rgba(255, 255, 255, 0.7);
+  --card-border: rgba(226, 232, 240, 0.8);
+  
+  --primary: #3b82f6; /* Modern Blue */
+  --primary-hover: #2563eb;
+  --primary-light: rgba(59, 130, 246, 0.1);
+  
+  --secondary: #64748b;
+  --accent: #f59e0b; /* Amber Gold accent */
+  
+  --success: #10b981; /* Green BUY signal */
+  --success-light: rgba(16, 185, 129, 0.1);
+  --danger: #ef4444; /* Red SELL signal */
+  --danger-light: rgba(239, 68, 68, 0.1);
+  
+  --neutral-dark: #1e293b;
+  --neutral-light: #f1f5f9;
+  
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+  --backdrop: blur(10px);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Color Palette (Premium Dark Mode) */
+    --background: #090d16;
+    --foreground: #f8fafc;
+    
+    --card-bg: rgba(15, 23, 42, 0.6);
+    --card-border: rgba(51, 65, 85, 0.5);
+    
+    --primary: #3b82f6;
+    --primary-hover: #60a5fa;
+    --primary-light: rgba(59, 130, 246, 0.15);
+    
+    --secondary: #94a3b8;
+    --accent: #fbbf24;
+    
+    --success: #10b981;
+    --success-light: rgba(16, 185, 129, 0.15);
+    --danger: #f87171;
+    --danger-light: rgba(248, 113, 113, 0.15);
+    
+    --neutral-dark: #f1f5f9;
+    --neutral-light: #1e293b;
+    --shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  }
 }
 
 @theme inline {
@@ -12,15 +67,67 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Premium UI utility classes */
+.glass-panel {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  backdrop-filter: var(--backdrop);
+  -webkit-backdrop-filter: var(--backdrop);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.btn-buy {
+  background: var(--success);
+  color: #ffffff;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  box-shadow: 0 4px 12px var(--success-light);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-buy:hover {
+  transform: scale(1.02);
+  filter: brightness(1.05);
+}
+
+.btn-sell {
+  background: var(--danger);
+  color: #ffffff;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  box-shadow: 0 4px 12px var(--danger-light);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-sell:hover {
+  transform: scale(1.02);
+  filter: brightness(1.05);
 }
