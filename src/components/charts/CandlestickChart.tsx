@@ -1,7 +1,14 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { createChart, IChartApi, ISeriesApi } from "lightweight-charts";
+import {
+  CandlestickSeries,
+  createChart,
+  createSeriesMarkers,
+  IChartApi,
+  ISeriesApi,
+  Time,
+} from "lightweight-charts";
 import { CandleData } from "@/lib/types";
 
 interface Props {
@@ -13,6 +20,7 @@ export default function CandlestickChart({ data, markers = [] }: Props) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
+  const markersRef = useRef<ReturnType<typeof createSeriesMarkers<Time>> | null>(null);
 
   useEffect(() => {
     if (!chartContainerRef.current) return;
@@ -34,7 +42,7 @@ export default function CandlestickChart({ data, markers = [] }: Props) {
       height: 350,
     });
 
-    const candlestickSeries = chart.addCandlestickSeries({
+    const candlestickSeries = chart.addSeries(CandlestickSeries, {
       upColor: "#10b981",
       downColor: "#ef4444",
       borderUpColor: "#10b981",
@@ -45,6 +53,7 @@ export default function CandlestickChart({ data, markers = [] }: Props) {
 
     candlestickSeries.setData(data);
     seriesRef.current = candlestickSeries;
+    markersRef.current = createSeriesMarkers(candlestickSeries, markers);
     chartRef.current = chart;
 
     // Obsługa zmiany szerokości okna
@@ -64,8 +73,8 @@ export default function CandlestickChart({ data, markers = [] }: Props) {
 
   // Efekt do obsługi markerów BUY/SELL
   useEffect(() => {
-    if (seriesRef.current && markers.length > 0) {
-      seriesRef.current.setMarkers(markers);
+    if (markersRef.current) {
+      markersRef.current.setMarkers(markers);
     }
   }, [markers]);
 

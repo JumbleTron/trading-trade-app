@@ -3,7 +3,6 @@ import { courses, chapters, lessons, exercises, exerciseOptions } from "@/db/sch
 import { eq } from "drizzle-orm";
 
 export async function seedInitialCourseData() {
-  // Sprawdzamy czy kurs już istnieje
   const existingCourses = await db.select().from(courses).limit(1);
   if (existingCourses.length > 0) {
     console.log("Kursy już istnieją w bazie danych. Pomijam seedowanie.");
@@ -14,7 +13,6 @@ export async function seedInitialCourseData() {
 
   const mainCourseId = "course-ta-foundations";
   
-  // 1. Dodawanie głównego kursu
   await db.insert(courses).values({
     id: mainCourseId,
     title: "Podstawy Analizy Technicznej i Czytania Wykresów",
@@ -25,7 +23,6 @@ export async function seedInitialCourseData() {
     orderIndex: 1,
   });
 
-  // 2. Rozdziały
   const chap1Id = "chap-1-intro";
   const chap2Id = "chap-2-trends";
   const chap3Id = "chap-3-candles";
@@ -54,7 +51,7 @@ export async function seedInitialCourseData() {
     }
   ]);
 
-  // 3. Lekcje dla Rozdziału 1
+  // LEKCJE ROZDZIAŁ 1
   const les1_1Id = "les-1-1-chart-types";
   const les1_2Id = "les-1-2-candle-anatomy";
 
@@ -96,7 +93,54 @@ export async function seedInitialCourseData() {
     }
   ]);
 
-  // 4. Ćwiczenie do Lekcji 1.2 (Predict & Reveal / Quiz)
+  // LEKCJE ROZDZIAŁ 2 (Trend)
+  const les2_1Id = "les-2-1-trends-intro";
+  await db.insert(lessons).values([
+    {
+      id: les2_1Id,
+      chapterId: chap2Id,
+      title: "2.1 Linie Trendu i Identyfikacja Kierunku Rynku",
+      contentJson: JSON.stringify({
+        blocks: [
+          { type: "paragraph", text: "Trend to ogólny kierunek, w którym podąża cena na wykresie. Wyróżniamy trzy główne typy trendów:" },
+          { type: "list", items: [
+            "**Trend wzrostowy (Uptrend)**: Charakteryzuje się coraz wyższymi szczytami (Higher Highs) i coraz wyższymi dołkami (Higher Lows).",
+            "**Trend spadkowy (Downtrend)**: Charakteryzuje się coraz niższymi szczytami (Lower Highs) i coraz niższymi dołkami (Lower Lows).",
+            "**Trend boczny (Consolidation)**: Ruch ceny w określonym przedziale bez wyraźnego kierunku."
+          ]}
+        ]
+      }),
+      lessonType: "practice",
+      durationMin: 8,
+      orderIndex: 1,
+    }
+  ]);
+
+  // LEKCJE ROZDZIAŁ 3 (Świece - Złoto, Ropa, US500)
+  const les3_1Id = "les-3-1-reversals";
+  await db.insert(lessons).values([
+    {
+      id: les3_1Id,
+      chapterId: chap3Id,
+      title: "3.1 Formacje Odwrócenia Trendu: Młot (Hammer) i Spadająca Gwiazda (Shooting Star)",
+      contentJson: JSON.stringify({
+        blocks: [
+          { type: "paragraph", text: "Formacje świecowe to najszybsze sygnały potencjalnego odwrócenia kierunku ceny na rynku. Dwa kluczowe wzorce to:" },
+          { type: "list", items: [
+            "**Młot (Hammer)**: Świeca z małym korpusem u góry i długim dolnym cieniem. Sygnalizuje odrzucenie niższych cen przez kupujących (byczy sygnał BUY).",
+            "**Spadająca Gwiazda (Shooting Star)**: Świeca z małym korpusem na dole i długim górnym cieniem. Sygnalizuje odrzucenie wyższych cen (niedźwiedzi sygnał SELL)."
+          ]}
+        ]
+      }),
+      lessonType: "practice",
+      durationMin: 10,
+      orderIndex: 1,
+    }
+  ]);
+
+  // --- ĆWICZENIA ---
+
+  // Ćwiczenie Rozdział 1 (Quiz)
   const ex1Id = "ex-1-2-candle-quiz";
   await db.insert(exercises).values({
     id: ex1Id,
@@ -120,5 +164,60 @@ export async function seedInitialCourseData() {
     { id: "opt-4", exerciseId: ex1Id, optionText: "Czerwona, górny cień wynosi 50", isCorrect: false },
   ]);
 
+  // Ćwiczenie Rozdział 2 (Wsparcie / Opór / Trend - PLN/EUR)
+  const ex2Id = "ex-2-1-trend-reveal";
+  const plnEurData = [
+    { time: "2026-07-01", open: 4.25, high: 4.28, low: 4.24, close: 4.27 },
+    { time: "2026-07-02", open: 4.27, high: 4.29, low: 4.26, close: 4.28 },
+    { time: "2026-07-03", open: 4.28, high: 4.31, low: 4.27, close: 4.30 },
+    { time: "2026-07-04", open: 4.30, high: 4.33, low: 4.29, close: 4.32 },
+    { time: "2026-07-05", open: 4.32, high: 4.34, low: 4.30, close: 4.33 },
+    // Punkt podjęcia decyzji (koniec 75%)
+    { time: "2026-07-06", open: 4.33, high: 4.35, low: 4.31, close: 4.34 },
+    // Ukryte świece, które zostaną odkryte po decyzji (rebound z oporu / spadek)
+    { time: "2026-07-07", open: 4.34, high: 4.35, low: 4.28, close: 4.29 },
+    { time: "2026-07-08", open: 4.29, high: 4.30, low: 4.22, close: 4.23 },
+  ];
+
+  await db.insert(exercises).values({
+    id: ex2Id,
+    lessonId: les2_1Id,
+    type: "predict_reveal",
+    chartDataJson: JSON.stringify(plnEurData),
+    question: "Wykres EUR/PLN dotarł do silnego, historycznego poziomu oporu na 4.35. Świece zaczynają tracić dynamikę. Jaka decyzja jest prawidłowa?",
+    correctAnswer: "SELL",
+    explanation: "Cena dotarła do silnego oporu na poziomie 4.35 zł za euro i nastąpiło odrzucenie tego poziomu (spadek do 4.23). Otwieranie pozycji krótkiej (SELL) było prawidłową decyzją.",
+    market: "EURPLN",
+    timeframe: "D1",
+    difficulty: "medium"
+  });
+
+  // Ćwiczenie Rozdział 3 (Formacja Świecowa - Złoto XAU/USD)
+  const goldData = [
+    { time: "2026-07-10", open: 1950, high: 1965, low: 1945, close: 1960 },
+    { time: "2026-07-11", open: 1960, high: 1970, low: 1955, close: 1968 },
+    { time: "2026-07-12", open: 1968, high: 1980, low: 1960, close: 1975 },
+    { time: "2026-07-13", open: 1975, high: 1995, low: 1970, close: 1990 },
+    // Spadająca gwiazda (odrzucenie poziomu 2000 USD)
+    { time: "2026-07-14", open: 1990, high: 2010, low: 1980, close: 1982 },
+    // Ukryte świece (drastyczne spadki po odwróceniu)
+    { time: "2026-07-15", open: 1982, high: 1985, low: 1940, close: 1945 },
+    { time: "2026-07-16", open: 1945, high: 1950, low: 1910, close: 1915 },
+  ];
+
+  await db.insert(exercises).values({
+    id: ex3Id,
+    lessonId: les3_1Id,
+    type: "predict_reveal",
+    chartDataJson: JSON.stringify(goldData),
+    question: "Na wykresie Złota (XAU/USD) utworzyła się świeca z bardzo długim górnym cieniem (odrzucenie bariery 2000 USD) i małym korpusem u dołu (Spadająca Gwiazda / Shooting Star). Jaki sygnał generuje ten układ?",
+    correctAnswer: "SELL",
+    explanation: "Długi górny cień świecy z 14 lipca oznacza, że kupujący próbowali wypchnąć cenę powyżej 2000 USD, ale podaż silnie zepchnęła ją z powrotem na dół. Powstała Spadająca Gwiazda zapowiadająca spadki (SELL).",
+    market: "XAUUSD",
+    timeframe: "H4",
+    difficulty: "hard"
+  });
+
   console.log("Seedowanie ukończone pomyślnie.");
 }
+const ex3Id = "ex-3-1-candle-gold";

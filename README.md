@@ -31,26 +31,43 @@ Zaimplementowany schemat Drizzle ORM obsługuje:
    npm install
    ```
 
-3. Skonfiguruj plik `.env` (stwórz na podstawie pliku `.env` wpisując swoje hasło do MySQL i sekret auth):
+3. Skonfiguruj plik `.env` na podstawie `.env.example` (wpisz własne hasła i sekret auth):
    ```env
-   DATABASE_URL="mysql://uzytkownik:haslo@127.0.0.1:3306/trade_training"
+   DATABASE_URL="mysql://uzytkownik:haslo@127.0.0.1:13306/trade_training"
    AUTH_SECRET="twoj-unikalny-klucz-auth"
    ```
 
-4. Wygeneruj i wgraj tabele do bazy MySQL:
+4. Uruchom bazę MySQL w Dockerze:
+   ```bash
+   docker compose up -d db
+   ```
+
+5. Wygeneruj i wgraj tabele do bazy MySQL:
    ```bash
    npm run db:push
    ```
 
-5. Uruchom seedowanie bazy danych z początkowymi lekcjami i quizem:
+6. Uruchom seedowanie bazy danych z początkowymi lekcjami i quizem:
    ```bash
    npm run db:seed
    ```
 
-6. Uruchom serwer deweloperski:
+7. Uruchom serwer deweloperski:
    ```bash
    npm run dev
    ```
+
+## Docker Compose
+
+Cały stos (MySQL + Next.js) można uruchomić jednym poleceniem:
+
+```bash
+cp .env.example .env
+docker compose up --build -d
+docker compose exec app npm run db:setup
+```
+
+Aplikacja będzie dostępna pod `http://localhost:13000`, a dane MySQL są przechowywane w wolumenie `mysql_data`. Zatrzymanie kontenerów nie usuwa danych; aby usunąć również bazę, użyj `docker compose down -v`.
 
 ## 📄 Licencja
 Projekt udostępniony na licencji **MIT**.
